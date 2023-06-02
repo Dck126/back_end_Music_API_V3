@@ -1,5 +1,9 @@
+const Joi = require("joi");
 const InvariantError = require("../../exceptions/InvariantError");
-const { ExportSongsPayloadSchema } = require("./schema");
+
+const ExportSongsPayloadSchema = Joi.object({
+  targetEmail: Joi.string().email({ tlds: true }).required(),
+});
 
 const ExportsValidator = {
   validateExportPayload: (payload) => {

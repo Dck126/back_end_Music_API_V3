@@ -16,40 +16,40 @@ class UserAlbumLikesService {
     };
     const values = [id, userId, albumId];
     const result = await this._pool.query(query, values);
-
     if (!result.rows[0].id) {
       throw new InvariantError("Cannot add an Album Like");
     }
-
     await this._cacheService.remove(`likes:${albumId}`);
     return result.rows[0].id;
   }
 
   async getAlbumLike(albumId) {
-    const result = await this._cacheService.get(`likes:${albumId}`);
+    try {
+      const result = await this._cacheService.get(`likes:${albumId}`);
+      if (result) {
+        return { likes: parseInt(JSON.parse(result)), cache: true };
+      }
+    } catch {
+      const query = {
+        text: `SELECT COUNT(*) FROM user_album_likes WHERE album_id = $1`,
+      };
+      const values = [albumId];
 
-    if (result) return { likes: parseInt(JSON.parse(result)), isCached: true };
+      const { rows, rowCount } = await this._pool.query(query, values);
+      if (!rowCount) {
+        throw new NotFoundError("Album not found");
+      }
 
-    const query = {
-      text: `SELECT COUNT(*) FROM user_album_likes WHERE album_id = $1`,
-    };
-    const values = [albumId];
+      await this._cacheService.set(
+        `likes:${albumId}`,
+        JSON.stringify(rows[0].count)
+      );
 
-    const { rows, rowCount } = await this._pool.query(query, values);
-
-    if (!rowCount) {
-      throw new NotFoundError("Album not found");
+      return {
+        likes: parseInt(rows[0].count, 10),
+        cache: false,
+      };
     }
-
-    await this._cacheService.set(
-      `likes:${albumId}`,
-      JSON.stringify(rows[0].count)
-    );
-
-    return {
-      likes: parseInt(rows[0].count, 10),
-      isCached: false,
-    };
   }
 
   async deleteAlbumLike(userId, albumId) {

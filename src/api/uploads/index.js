@@ -1,13 +1,14 @@
 const UploadsHandler = require("./handler");
 const routes = require("./routes");
+const UploadsValidator = require("./validator");
 
 module.exports = {
   name: "uploads",
   version: "1.0.0",
-  register: async (server, { service, validator, albumsService }) => {
+  register: async (server, { service, albumsService }) => {
     const uploadsHandler = new UploadsHandler(
       service,
-      validator,
+      UploadsValidator,
       albumsService
     );
     server.route(routes(uploadsHandler));

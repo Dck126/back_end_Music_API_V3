@@ -35,12 +35,10 @@ const ActivityService = require("../services/ActivityService");
 // Exports
 const _exports = require("../api/Exports");
 const ProducerService = require("../services/rabbitmq/ProducerService");
-const ExportsValidator = require("../validator/exports");
 
 // Uploads
 const uploads = require("../api/uploads");
 const StorageService = require("../services/storage/StorageService");
-const UploadsValidator = require("../validator/uploads");
 
 // user album like
 const userAlbumLikes = require("../api/userAlbumsLike");
@@ -152,7 +150,6 @@ async function createServer() {
       plugin: _exports,
       options: {
         service: ProducerService,
-        validator: ExportsValidator,
         playlistsService,
       },
     },
@@ -160,7 +157,6 @@ async function createServer() {
       plugin: uploads,
       options: {
         service: storageService,
-        validator: UploadsValidator,
         albumsService,
       },
     },
